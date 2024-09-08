@@ -1,70 +1,106 @@
-Ansible sur windows:
+Installation de l'environnement Ansible sur Windows
+
+1. Installation d'Ubuntu via WSL
+
+Sur votre machine Windows, exécutez la commande suivante dans PowerShell
+
+wsl --install
 
 
-Host : votre machine windows de développement
-1- Sur votre host, en utilisant la commande wsl --install sur PowerShell
-Cette commande permet d'installer un "Ubuntu" dans votre windows
-Une fois l'exécution de la commande terminée, redémarrer le host
-Remarque: Parfois,le rédémarrage n'est pas nécessaire et une fenetre indiquant l'instllation de Ubuntu sera affiché
+2. Configuration d'Ubuntu
 
-Quand l'installation sera terminé, il vous sera demandé de saisir un username et un mot de passe unix.
-Utilisez un user et un mot de passe simple.Ex: ubuntu/ubuntu
+Lorsque l'installation est terminée, vous serez invité à créer un nom d'utilisateur et un mot de passe UNIX. Utilisez des identifiants simples, par exemple :
 
-2- mettre à jour les dépôt logiciels :
+    Username: ubuntu
+    Password: Ubuntu
+
+
+3. Mise à jour des dépôts logiciels
+
 sudo apt update
 
-3- Installer les logiciels indispensable pour le travil sur Ubuntu
+
+4. Installation des logiciels essentiels
+
+Installez les outils nécessaires sur Ubuntu avec la commande suivante :
+
 sudo apt -y install software-properties-common
 
-4- Ajouter le dépôt ansible 
+
+5. Ajout du dépôt Ansible
+
 sudo apt-add-repository ppa:ansible/ansible
 
-5 - enore une fois : sudo apt update
 
-6- lancer l'instllation de Ansible:
-sudo apt -y install ansible
+6. Mise à jour des dépôts
 
-7- Vérfier l'installation
+sudo apt update
+
+
+7. Installation d'Ansible
+
+sudo apt -y install ansible 
+
+
+8. Vérification de l'installation d'Ansible
+
 ansible --version
 
 
-Vagrant et provisionnement de l'infra
+9. Ajouter l'utilisateur ansible sur cette sous-mchine linux et lui créer sa clé RSA
 
-8- Ouvrir une console CMD sur votre host et cloner le projet de base
-git clone https://github.com/salemba/mapr.git
+cd mapr/vagrant
+sudo chmod +x setup_ansible_user.sh
+sudo ./setup_ansible_user.sh
+sudo su ansible
+cd
+ssh-keygen -t rsa -N "" -f ~/.ssh/id_rsa
 
-9- cd mapr/vagrant
+10. Mettre à jour le fichier /etc/hosts en ajoutant les lignes suivantes
 
-10- vagrant up
+192.168.50.101 node01.cluster.local
+192.168.50.102 node02.cluster.local
+192.168.50.103 node03.cluster.local
+192.168.50.199 edge.cluster.local
 
-Vérification:
-Une fois les 4 VM démarrées, se connecter aux Vm et vérifier l'accès passwordless pour l'utilisateur ansible.
-Si ce n'est pas le cas:
-10.1- vagrant ssh node01.cluster.local
-10.2- sudo apt-get instll -y git
-10.3- git clone https://github.com/salemba/mapr.git
-10.4- cd mapr/vagrant 
-10.5- chmod +x setup_ansible_user.sh
-10.6- sudo ./setup_ansible_user.sh
-10.7- sudo su ansible & cd
-10.8- ssh-keygen -t rsa
-10.9- exit
-10.10- exit
 
-Refaire les mêmes commandes pour l'ensemble des VM créées par vagrant en modifiant le nom du hôte dans l'instrcution 10.1. Une fois terminé, passer à l'action 10.11
-10.11- vagrant ssh node01.cluster.local
-10.12- sudo su ansible & cd
-10.13- ssh-copy-id node01.cluster.local
-10.14- ssh-copy-id node02.cluster.local
-10.15- ssh-copy-id node03.cluster.local
-10.16- ssh-copy-id edge.cluster.local
+Sur la machine Ansible:
 
 Installation & configuration de Mapr
-11- Revenir sur la console de votre sous-machine ubuntu (celle que vous avez créé avec wsl dans l'instruction 1-)
-12- Assurez vous d'être l'utilisateur ansible, sinon, sudo su - ansible
-13- cd
-14- git clone https://github.com/salemba/mapr.git
-15- cd mapr/ansible
-16- ansible-playbook deploy-mapr.yml
+
+1. Revenir sur la console de votre sous-machine ubuntu 
+
+2. Faire: sudo su - ansible
+
+3. cd mapr/ansible
+
+4. Editer le fichier ansible.cfg pour faire pointer votre inventory.ini dans la config par défaut, en ajoutant la ligne suivante:
+
+        inventory = /home/ansible/mapr/ansible/inventory.ini
+
+5. Editer le fichier /ansible/mapr_configuration/vars/main.yml
+        
+        email: "votre-email"
+        repo_password: "votre-token-hpe"
+        mapr_password: "mapr"
+
+
+7. ansible-playbook -i inventory.ini ansible_setup_passwordless_ssh.yml
+
+8. ansible all -m ping
+
+9. ansible-playbook deploy_mapr.yml
+
+
+Installation et configuration de Sensu.
+
+
+Installer Sensu.
+
+Exécutez la commande suivante :
+
+ansible-playbook -i inventory.ini install_sensu.yml
+
+
 
 
