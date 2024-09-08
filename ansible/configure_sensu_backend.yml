@@ -1,0 +1,21 @@
+---
+- name: Installer et configurer Sensu Go Backend
+  hosts: all
+  become: yes
+  tasks:
+    - name: Copier le template de configuration Sensu
+      get_url:
+        url: https://docs.sensu.io/sensu-go/latest/files/backend.yml
+        dest: /etc/sensu/backend.yml
+
+    - name: Démarrer le service sensu-backend
+      systemd:
+        name: sensu-backend
+        state: started
+        enabled: yes
+
+    - name: Vérifier que le service sensu-backend est actif
+      systemd:
+        name: sensu-backend
+        state: started
+        enabled: yes

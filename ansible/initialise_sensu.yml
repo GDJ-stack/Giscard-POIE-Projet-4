@@ -1,0 +1,34 @@
+---
+- name: Initialiser Sensu Go Backend sur tous les nœuds
+  hosts: all
+  become: yes
+  vars:
+    sensu_admin_username: "sensu"  # Remplacez par le nom d'utilisateur souhaité
+    sensu_admin_password: "sensu"  # Remplacez par le mot de passe souhaité
+  tasks:
+    - name: Définir les variables d'environnement pour l'initialisation de Sensu
+      shell: |
+        export SENSU_BACKEND_CLUSTER_ADMIN_USERNAME={{ sensu_admin_username }}
+        export SENSU_BACKEND_CLUSTER_ADMIN_PASSWORD={{ sensu_admin_password }}
+        sensu-backend init
+      environment:
+        SENSU_BACKEND_CLUSTER_ADMIN_USERNAME: "{{ sensu_admin_username }}"
+        SENSU_BACKEND_CLUSTER_ADMIN_PASSWORD: "{{ sensu_admin_password }}"
+      register: init_result
+      ignore_errors: yes
+
+    - name: Vérifier le résultat de l'initialisation de Sensu
+      debug:
+        msg: "Sensu backend init output: {{ init_result.stdout }}"
+
+    - name: Vérifier le code de retour de l'initialisation de Sensu
+      failed_when: init_result.rc != 0
+      debug:
+        msg: "Sensu backend init failed with return code {{ init_result.rc }}"
+
+    - name: Assurer que le service sensu-backend est actif
+      systemd:
+        name: sensu-backend
+        state: started
+        enabled: yes
+

@@ -1,0 +1,21 @@
+---
+- name: Installer et configurer Sensu Go
+  hosts: all
+  become: yes
+
+  tasks:
+    - name: Ajouter le dépôt Sensu
+      shell: |
+        curl -s https://packagecloud.io/install/repositories/sensu/stable/script.deb.sh | sudo bash
+
+    - name: Installer le package Sensu Go Backend
+      apt:
+        name: sensu-go-backend
+        state: present
+
+    - name: Installer sensuctl
+      apt:
+        name: sensu-go-cli
+        state: present
+
+

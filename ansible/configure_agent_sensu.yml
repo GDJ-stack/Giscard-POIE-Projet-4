@@ -1,0 +1,17 @@
+---
+- name: Configurer et démarrer l'agent Sensu
+  hosts: all
+  become: yes
+
+  tasks:
+    - name: Télécharger le fichier de configuration de l'agent Sensu
+      ansible.builtin.get_url:
+        url: https://docs.sensu.io/sensu-go/latest/files/agent.yml
+        dest: /etc/sensu/agent.yml
+
+    - name: Démarrer le service sensu-agent
+      ansible.builtin.systemd:
+        name: sensu-agent
+        state: started
+        enabled: yes
+

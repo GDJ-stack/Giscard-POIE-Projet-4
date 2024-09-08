@@ -1,0 +1,39 @@
+---
+- name: Installer Ansible sur tous les nœuds
+  hosts: all_nodes
+  become: yes
+
+  tasks:
+    - name: Mettre à jour les dépôts de paquets
+      apt:
+        update_cache: yes
+
+    - name: Installer les dépendances nécessaires
+      apt:
+        name: software-properties-common
+        state: present
+
+    - name: Ajouter le dépôt Ansible
+      apt_repository:
+        repo: ppa:ansible/ansible
+        state: present
+
+    - name: Mettre à jour les dépôts de paquets après ajout du dépôt Ansible
+      apt:
+        update_cache: yes
+
+    - name: Installer Ansible
+      apt:
+        name: ansible
+        state: present
+
+    - name: Vérifier l'installation d'Ansible
+      command: ansible --version
+      register: ansible_version
+      ignore_errors: yes
+
+    - name: Afficher la version d'Ansible installée
+      debug:
+        msg: "{{ ansible_version.stdout }}"
+      when: ansible_version.stdout is defined
+

@@ -1,0 +1,11 @@
+---
+- name: Démarrer Sensu Backend sur tous les nœuds
+  hosts: all
+  become: yes
+  tasks:
+    - name: Démarrer le service sensu-backend
+      systemd:
+        name: sensu-backend
+        state: started
+        enabled: yes
+

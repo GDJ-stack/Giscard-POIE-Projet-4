@@ -1,0 +1,37 @@
+---
+- name: Configurer sensuctl sur tous les nœuds
+  hosts: all
+  become: yes
+  vars:
+    sensu_admin_username: "sensu"  # Remplacez par le nom d'utilisateur Sensu
+    sensu_admin_password: "sensu"  # Remplacez par le mot de passe Sensu
+    sensu_url: "http://127.0.0.1:8080"  # URL du backend Sensu
+
+  tasks:
+    - name: Configurer sensuctl
+      shell: |
+        sensuctl configure -n \
+        --username '{{ sensu_admin_username }}' \
+        --password '{{ sensu_admin_password }}' \
+        --namespace default \
+        --url '{{ sensu_url }}'
+      register: configure_result
+
+    - name: Vérifier la configuration de sensuctl
+      debug:
+        msg: "Sensuctl configuration output: {{ configure_result.stdout }}"
+
+    - name: Vérifier le code de retour de la configuration de sensuctl
+      failed_when: configure_result.rc != 0
+      debug:
+        msg: "Sensuctl configure failed with return code {{ configure_result.rc }}"
+
+    - name: Afficher la configuration de sensuctl
+      shell: sensuctl config view
+      register: view_result
+      changed_when: false
+
+    - name: Afficher le résultat de la commande sensuctl config view
+      debug:
+        msg: "Sensuctl config view output: {{ view_result.stdout }}"
+

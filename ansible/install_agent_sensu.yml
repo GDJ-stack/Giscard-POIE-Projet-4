@@ -1,0 +1,20 @@
+---
+- name: Installer l'agent Sensu Go
+  hosts: all
+  become: yes
+  tasks:
+    - name: Ajouter le dépôt Sensu
+      shell: |
+        curl -s https://packagecloud.io/install/repositories/sensu/stable/script.deb.sh | sudo bash
+
+    - name: Installer le package Sensu Go Agent
+      apt:
+        name: sensu-go-agent
+        state: present
+
+    - name: Démarrer et activer le service Sensu Go Agent
+      systemd:
+        name: sensu-agent
+        state: started
+        enabled: yes
+
